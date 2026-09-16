@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tab Equalizer settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Chromium Tab Equalizer</p>
+    <h1>Saved settings</h1>
+    <p class="lede">Manage site profiles, custom presets, and local backup data. Nothing is synced or sent anywhere.</p>
+  </header>
+
+  <section aria-labelledby="sites-heading">
+    <div class="section-title"><h2 id="sites-heading">Site profiles</h2><span id="profile-count" class="count"></span></div>
+    <div id="profiles" class="list" aria-live="polite"></div>
+  </section>
+
+  <section aria-labelledby="presets-heading">
+    <div class="section-title"><h2 id="presets-heading">Custom presets</h2><span id="preset-count" class="count"></span></div>
+    <p class="note">Create presets from the popup after tuning an active tab.</p>
+    <div id="presets" class="list" aria-live="polite"></div>
+  </section>
+
+  <section aria-labelledby="backup-heading">
+    <h2 id="backup-heading">Backup</h2>
+    <p class="note">Export or replace only this extension's saved profiles, presets, and preferences.</p>
+    <div class="actions">
+      <button id="export" type="button">Export JSON</button>
+      <button id="import-button" type="button">Import JSON</button>
+      <input id="import-file" type="file" accept="application/json,.json" hidden>
+      <button id="clear-all" class="danger" type="button">Clear saved data</button>
+    </div>
+    <p id="message" class="message" role="status"></p>
+    <p id="error" class="error" role="alert" hidden></p>
+  </section>
+</main>
+<script type="module" src="options.js"></script>
+</body>
+</html>

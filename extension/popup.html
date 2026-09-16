@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tab Equalizer</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+<main>
+  <header class="topbar">
+    <div class="identity">
+      <strong>Tab Equalizer</strong>
+      <span id="hostname">Current tab</span>
+    </div>
+    <button id="power" class="power" type="button" aria-pressed="false">Enable</button>
+  </header>
+
+  <p id="status" class="status" role="status">Not active for this tab.</p>
+  <p id="error" class="error" role="alert" hidden></p>
+
+  <section class="section" aria-labelledby="level-heading">
+    <div class="section-heading">
+      <h2 id="level-heading">Level</h2>
+      <button id="mute" class="quiet-button" type="button" aria-pressed="false">Mute</button>
+    </div>
+    <label class="range-row" for="volume">
+      <span>Volume</span><output id="volume-value" for="volume">100%</output>
+    </label>
+    <input id="volume" type="range" min="0" max="200" step="1" value="100">
+    <label class="range-row" for="preamp">
+      <span>Preamp</span><output id="preamp-value" for="preamp">0 dB</output>
+    </label>
+    <input id="preamp" type="range" min="-12" max="12" step="0.5" value="0">
+  </section>
+
+  <section class="section" aria-labelledby="eq-heading">
+    <div class="section-heading"><h2 id="eq-heading">Equalizer</h2><span class="hint">±12 dB</span></div>
+    <div class="eq-grid" aria-label="10-band equalizer">
+      <label><input type="range" min="-12" max="12" step="0.5" value="0" data-eq="31" aria-label="31 Hz equalizer"><span>31</span></label>
+      <label><input type="range" min="-12" max="12" step="0.5" value="0" data-eq="62" aria-label="62 Hz equalizer"><span>62</span></label>
+      <label><input type="range" min="-12" max="12" step="0.5" value="0" data-eq="125" aria-label="125 Hz equalizer"><span>125</span></label>
+      <label><input type="range" min="-12" max="12" step="0.5" value="0" data-eq="250" aria-label="250 Hz equalizer"><span>250</span></label>
+      <label><input type="range" min="-12" max="12" step="0.5" value="0" data-eq="500" aria-label="500 Hz equalizer"><span>500</span></label>
+      <label><input type="range" min="-12" max="12" step="0.5" value="0" data-eq="1000" aria-label="1 kHz equalizer"><span>1k</span></label>
+      <label><input type="range" min="-12" max="12" step="0.5" value="0" data-eq="2000" aria-label="2 kHz equalizer"><span>2k</span></label>
+      <label><input type="range" min="-12" max="12" step="0.5" value="0" data-eq="4000" aria-label="4 kHz equalizer"><span>4k</span></label>
+      <label><input type="range" min="-12" max="12" step="0.5" value="0" data-eq="8000" aria-label="8 kHz equalizer"><span>8k</span></label>
+      <label><input type="range" min="-12" max="12" step="0.5" value="0" data-eq="16000" aria-label="16 kHz equalizer"><span>16k</span></label>
+    </div>
+    <div id="preset-row" class="preset-row" aria-label="Built-in presets">
+      <button type="button" data-preset="Flat">Flat</button>
+      <button type="button" data-preset="Bass Boost">Bass</button>
+      <button type="button" data-preset="Vocal">Vocal</button>
+      <button type="button" data-preset="Treble Boost">Treble</button>
+      <button type="button" data-preset="Night">Night</button>
+    </div>
+    <div class="custom-preset-row">
+      <label class="sr-only" for="user-preset">Custom preset</label>
+      <select id="user-preset"><option value="">Custom presets</option></select>
+      <button id="save-preset" type="button">Save current</button>
+    </div>
+    <form id="save-preset-form" class="save-preset-form" hidden>
+      <label for="preset-name">Preset name</label>
+      <div><input id="preset-name" maxlength="80" autocomplete="off"><button type="submit">Save</button></div>
+    </form>
+  </section>
+
+  <details class="section advanced">
+    <summary>Advanced</summary>
+    <label class="range-row" for="balance"><span>Balance</span><output id="balance-value" for="balance">Center</output></label>
+    <input id="balance" type="range" min="-100" max="100" step="1" value="0">
+
+    <div class="switch-row"><label for="mono">Mono</label><input id="mono" type="checkbox"></div>
+    <div class="switch-row"><label for="compressor">Compressor</label><input id="compressor" type="checkbox"></div>
+    <div id="compressor-controls" class="subcontrols">
+      <label class="range-row" for="threshold"><span>Threshold</span><output id="threshold-value" for="threshold">-24 dB</output></label>
+      <input id="threshold" type="range" min="-100" max="0" step="1" value="-24">
+      <label class="range-row" for="ratio"><span>Ratio</span><output id="ratio-value" for="ratio">4:1</output></label>
+      <input id="ratio" type="range" min="1" max="20" step="0.5" value="4">
+    </div>
+    <div class="switch-row"><label for="limiter">Limiter</label><input id="limiter" type="checkbox" checked></div>
+  </details>
+
+  <section class="section memory">
+    <div class="switch-row">
+      <div><label for="remember">Remember for this site</label><span class="hint" id="remember-host"></span></div>
+      <input id="remember" type="checkbox">
+    </div>
+  </section>
+
+  <footer>
+    <button id="bypass" type="button" aria-pressed="false">Bypass</button>
+    <button id="reset" type="button">Reset</button>
+    <button id="options" class="quiet-button" type="button">Saved settings</button>
+  </footer>
+</main>
+<script type="module" src="popup.js"></script>
+</body>
+</html>

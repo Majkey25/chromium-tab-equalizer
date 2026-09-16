@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Static checks
+        run: npm run check
+      - name: Unit tests
+        run: npm run test:unit
+      - name: Install Chromium for Testing
+        run: npx --yes playwright@1.62.1 install --with-deps chromium
+      - name: Resolve Chromium executable
+        id: browser
+        shell: bash
+        run: |
+          BROWSER_PATH="$(find "$HOME/.cache/ms-playwright" -type f -path '*/chrome-linux*/chrome' -perm -111 | head -n 1)"
+          test -n "$BROWSER_PATH"
+          echo "path=$BROWSER_PATH" >> "$GITHUB_OUTPUT"
+      - name: Real unpacked-extension browser test
+        env:
+          BROWSER_PATH: ${{ steps.browser.outputs.path }}
+        run: npm run test:browser
+      - name: Package
+        run: python3 scripts/package.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: test
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify stable smoke-test gate and version
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          MANIFEST_VERSION="$(python3 -c 'import json; print(json.load(open("extension/manifest.json"))["version"])')"
+          test "$VERSION" = "$MANIFEST_VERSION"
+          SMOKE="docs/smoke/v${VERSION}.md"
+          test -f "$SMOKE"
+          grep -Fx 'Result: PASS' "$SMOKE"
+      - uses: actions/download-artifact@v4
+        with:
+          name: release
+          path: dist
+      - name: Publish standard GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            dist/chromium-tab-equalizer-*.zip dist/SHA256SUMS.txt \
+            --title "Chromium Tab Equalizer $GITHUB_REF_NAME" \
+            --notes-file .github/release-notes.md

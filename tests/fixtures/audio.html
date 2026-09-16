@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tab Equalizer audio fixture</title>
+  <style>
+    body { font: 16px system-ui, sans-serif; max-width: 680px; margin: 48px auto; padding: 0 20px; line-height: 1.5; }
+    button { font: inherit; padding: 8px 12px; margin-right: 6px; }
+    code { background: #eee; padding: 2px 4px; }
+  </style>
+</head>
+<body>
+  <h1>Tab Equalizer audio fixture</h1>
+  <p>This page produces a steady stereo test tone only after you click Start tone.</p>
+  <button id="start" type="button">Start tone</button>
+  <button id="stop" type="button" disabled>Stop tone</button>
+  <p id="state" role="status">Stopped</p>
+  <script>
+    let context;
+    let gain;
+    let left;
+    let right;
+    const state = document.querySelector('#state');
+    document.querySelector('#start').addEventListener('click', async () => {
+      if (context) return;
+      context = new AudioContext();
+      left = new OscillatorNode(context, { frequency: 220, type: 'sine' });
+      right = new OscillatorNode(context, { frequency: 880, type: 'sine' });
+      const merger = new ChannelMergerNode(context, { numberOfInputs: 2 });
+      gain = new GainNode(context, { gain: 0.08 });
+      left.connect(merger, 0, 0);
+      right.connect(merger, 0, 1);
+      merger.connect(gain).connect(context.destination);
+      left.start(); right.start();
+      state.textContent = 'Playing 220 Hz left / 880 Hz right';
+      document.querySelector('#start').disabled = true;
+      document.querySelector('#stop').disabled = false;
+    });
+    document.querySelector('#stop').addEventListener('click', async () => {
+      if (!context) return;
+      left.stop(); right.stop();
+      await context.close();
+      context = gain = left = right = null;
+      state.textContent = 'Stopped';
+      document.querySelector('#start').disabled = false;
+      document.querySelector('#stop').disabled = true;
+    });
+  </script>
+</body>
+</html>

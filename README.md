@@ -84,14 +84,14 @@ A managed browser that blocks unpacked extensions cannot run the browser integra
 
 ## Manual audio smoke test
 
-Parameter and browser lifecycle tests do not prove audible output quality. Before the first stable release:
+Automated tests verify the extension lifecycle, controls and real unpacked-Chromium loading, but they cannot judge audible quality. For local listening verification you can run:
 
 ```sh
 npm run smoke
 ```
 
-The script serves a local stereo tone fixture and records a human PASS/FAIL result under `.reference/smoke.json`. Copy a verified PASS into `docs/smoke/v1.0.0.md` using the template in `docs/smoke/TEMPLATE.md` before tagging `v1.0.0`.
+The smoke helper serves a local stereo tone fixture and records a local PASS/FAIL result under `.reference/smoke.json`. It is an additional listening check, not a release blocker.
 
 ## Releases
 
-`python3 scripts/package.py` creates a deterministic `dist/chromium-tab-equalizer-<version>.zip` and `SHA256SUMS.txt`. CI runs syntax checks, unit tests, the real unpacked-browser integration test, and packaging. A `v*` tag can publish a normal GitHub release only when the matching committed smoke record contains `Result: PASS`.
+`python3 scripts/package.py` creates a deterministic `dist/chromium-tab-equalizer-<version>.zip` and `SHA256SUMS.txt`. Every push to `main` runs static checks, unit tests, a real unpacked-Chromium integration test and packaging. After those checks pass, CI publishes the stable `v<manifest version>` GitHub Release if that version does not already exist. Release assets include the installable ZIP and SHA-256 checksums.

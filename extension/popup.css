@@ -30,6 +30,10 @@ button, input, summary { font: inherit; }
 button { color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; cursor: pointer; }
 button:hover { border-color: var(--accent); }
 button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+#mute { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 78px; transition: background-color .12s ease, border-color .12s ease, color .12s ease; }
+#mute[aria-pressed="true"] { background: #dc2626; border-color: #dc2626; color: #fff; font-weight: 700; }
+#mute[aria-pressed="true"]:hover { background: #b91c1c; border-color: #b91c1c; }
+#mute[aria-pressed="true"]::before { content: ""; width: 13px; height: 13px; display: inline-block; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M4 9v6h4l5 4V5L8 9H4Zm12.6 3 2.7-2.7-1.4-1.4-2.7 2.7-2.7-2.7-1.4 1.4 2.7 2.7-2.7 2.7 1.4 1.4 2.7-2.7 2.7 2.7 1.4-1.4-2.7-2.7Z'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M4 9v6h4l5 4V5L8 9H4Zm12.6 3 2.7-2.7-1.4-1.4-2.7 2.7-2.7-2.7-1.4 1.4 2.7 2.7-2.7 2.7 1.4 1.4 2.7-2.7 2.7 2.7 1.4-1.4-2.7-2.7Z'/%3E%3C/svg%3E") center / contain no-repeat; }
 button:disabled, input:disabled { opacity: .48; cursor: default; }
 button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -68,7 +72,6 @@ footer { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 12
 footer #options { grid-column: 1 / -1; }
 .quiet-button { background: transparent; }
 .section-reset { padding: 4px 8px; font-size: 11px; }
-
 .custom-preset-row { display: grid; grid-template-columns: 1fr auto; gap: 5px; margin-top: 6px; }
 .custom-preset-row select, .save-preset-form input { min-width: 0; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 6px; font: inherit; font-size: 11px; }
 .save-preset-form { margin-top: 7px; font-size: 11px; }

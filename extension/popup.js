@@ -79,6 +79,7 @@ function render(next) {
   elements.ratioValue.value = `${s.compressor.ratio}:1`;
   elements.limiter.checked = s.limiter;
   elements.mute.setAttribute('aria-pressed', String(s.muted));
+  elements.mute.textContent = s.muted ? 'Muted' : 'Mute';
   elements.bypass.setAttribute('aria-pressed', String(s.bypass));
   elements.remember.checked = next.rememberForSite;
   elements.compressorControls.hidden = !s.compressor.enabled;
@@ -161,11 +162,11 @@ elements.compressor.addEventListener('change', () => {
 });
 elements.threshold.addEventListener('input', () => {
   elements.thresholdValue.value = formatDb(elements.threshold.value);
-  schedulePatch({ compressor: { threshold: Number(elements.threshold.value) }, preset: 'Custom' });
+  schedulePatch({ compressor: { threshold: Number(elements.threshold.value), enabled: state.settings.compressor.enabled }, preset: 'Custom' });
 });
 elements.ratio.addEventListener('input', () => {
   elements.ratioValue.value = `${elements.ratio.value}:1`;
-  schedulePatch({ compressor: { ratio: Number(elements.ratio.value) }, preset: 'Custom' });
+  schedulePatch({ compressor: { ratio: Number(elements.ratio.value), enabled: state.settings.compressor.enabled }, preset: 'Custom' });
 });
 elements.limiter.addEventListener('change', () => schedulePatch({ limiter: elements.limiter.checked, preset: 'Custom' }));
 elements.mute.addEventListener('click', () => schedulePatch({ muted: !state.settings.muted }));

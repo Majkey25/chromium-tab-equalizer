@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.1 - 2026-09-17
 
 - Refreshed the extension branding with a cleaner minimalist transparent SVG icon used across the popup and settings page.
 - Added section-level reset actions for Level, Equalizer, and Advanced controls while keeping the global Reset all control.

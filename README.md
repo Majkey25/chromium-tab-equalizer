@@ -16,6 +16,7 @@ A compact **per-tab audio equalizer** for Chromium browsers. Enable it only on t
 - 10-band graphic EQ: **31 / 62 / 125 / 250 / 500 Hz / 1 / 2 / 4 / 8 / 16 kHz**, each ±12 dB.
 - Balance, mono fold-down, compressor threshold/ratio, and a final safety limiter.
 - Built-in Flat, Bass Boost, Treble Boost, Vocal, and Night presets.
+- Section-level reset buttons for Level, Equalizer, and Advanced controls, plus a global Reset all action.
 - Save your own presets from the current tuned tab.
 - Temporary per-tab settings by default. Enable **Remember for this site** to store a hostname profile locally.
 - Manage site profiles and presets and import/export JSON from the options page.

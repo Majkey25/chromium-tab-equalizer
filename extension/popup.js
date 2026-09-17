@@ -24,7 +24,6 @@ async function request(type, data = {}) {
   return response;
 }
 
-
 function renderUserPresets() {
   const current = elements.userPreset.value;
   elements.userPreset.replaceChildren(new Option('Custom presets', ''));
@@ -44,7 +43,7 @@ function showError(message = '') {
 }
 
 function setControlsDisabled(disabled) {
-  for (const control of $$('input, button[data-preset], #mute, #bypass, #reset')) control.disabled = disabled;
+  for (const control of $$('input, button[data-preset], #mute, #bypass, #reset, [data-reset-section]')) control.disabled = disabled;
   elements.power.disabled = false;
   elements.options.disabled = false;
   elements.remember.disabled = disabled;
@@ -91,6 +90,16 @@ function render(next) {
   for (const button of $$('[data-preset]')) button.setAttribute('aria-pressed', String(button.dataset.preset === s.preset));
   setControlsDisabled(!next.active);
   rendering = false;
+}
+
+function resetSection(section) {
+  const defaults = cloneDefaultSettings();
+  const resetters = {
+    level: () => schedulePatch({ volume: defaults.volume, preamp: defaults.preamp, muted: defaults.muted, preset: 'Custom' }),
+    eq: () => schedulePatch({ eq: { ...defaults.eq }, preset: defaults.preset }),
+    advanced: () => schedulePatch({ balance: defaults.balance, mono: defaults.mono, compressor: { ...defaults.compressor }, limiter: defaults.limiter, preset: 'Custom' }),
+  };
+  resetters[section]?.();
 }
 
 function schedulePatch(patch) {
@@ -165,6 +174,11 @@ elements.bypass.addEventListener('click', () => schedulePatch({ bypass: !state.s
 for (const button of $$('[data-preset]')) button.addEventListener('click', async () => {
   try { render((await request('APPLY_PRESET', { name: button.dataset.preset })).state); }
   catch (error) { showError(error.message); }
+});
+
+for (const button of $$('[data-reset-section]')) button.addEventListener('click', (event) => {
+  event.preventDefault();
+  resetSection(button.dataset.resetSection);
 });
 
 elements.remember.addEventListener('change', async () => {

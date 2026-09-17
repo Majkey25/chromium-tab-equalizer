@@ -6,9 +6,15 @@ import { readFile, rm } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 
 const exec = promisify(execFile);
-const zipPath = 'dist/chromium-tab-equalizer-1.0.0.zip';
+
+async function getVersion() {
+  const pkg = JSON.parse(await readFile('package.json', 'utf8'));
+  return pkg.version;
+}
 
 test('package script is deterministic and emits matching checksum', async () => {
+  const version = await getVersion();
+  const zipPath = `dist/chromium-tab-equalizer-${version}.zip`;
   await rm('dist', { recursive: true, force: true });
   await exec('python3', ['scripts/package.py']);
   const first = await readFile(zipPath);
@@ -18,10 +24,12 @@ test('package script is deterministic and emits matching checksum', async () => 
   const secondHash = createHash('sha256').update(second).digest('hex');
   assert.equal(firstHash, secondHash);
   const sums = await readFile('dist/SHA256SUMS.txt', 'utf8');
-  assert.match(sums, new RegExp(`^${firstHash}  chromium-tab-equalizer-1\\.0\\.0\\.zip\\n$`));
+  assert.match(sums, new RegExp(`^${firstHash}  chromium-tab-equalizer-${version.replace(/\./g, '\\.')}\\.zip\\n$`));
 });
 
 test('release ZIP has manifest at its root and excludes development files', async () => {
+  const version = await getVersion();
+  const zipPath = `dist/chromium-tab-equalizer-${version}.zip`;
   await exec('python3', ['scripts/package.py']);
   const { stdout } = await exec('python3', ['-c', `import zipfile; z=zipfile.ZipFile('${zipPath}'); print('\\n'.join(z.namelist()))`]);
   const names = stdout.trim().split(/\r?\n/);

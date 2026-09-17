@@ -9,9 +9,12 @@
 <body>
 <main>
   <header class="topbar">
-    <div class="identity">
-      <strong>Tab Equalizer</strong>
-      <span id="hostname">Current tab</span>
+    <div class="identity-wrap">
+      <img class="brand-icon" src="icons/icon.svg" alt="" width="24" height="24">
+      <div class="identity">
+        <strong>Tab Equalizer</strong>
+        <span id="hostname">Current tab</span>
+      </div>
     </div>
     <button id="power" class="power" type="button" aria-pressed="false">Enable</button>
   </header>
@@ -22,7 +25,7 @@
   <section class="section" aria-labelledby="level-heading">
     <div class="section-heading">
       <h2 id="level-heading">Level</h2>
-      <button id="mute" class="quiet-button" type="button" aria-pressed="false">Mute</button>
+      <button class="quiet-button section-reset" type="button" data-reset-section="level">Reset</button>
     </div>
     <label class="range-row" for="volume">
       <span>Volume</span><output id="volume-value" for="volume">100%</output>
@@ -32,10 +35,19 @@
       <span>Preamp</span><output id="preamp-value" for="preamp">0 dB</output>
     </label>
     <input id="preamp" type="range" min="-12" max="12" step="0.5" value="0">
+    <div class="inline-actions">
+      <button id="mute" class="quiet-button" type="button" aria-pressed="false">Mute</button>
+    </div>
   </section>
 
   <section class="section" aria-labelledby="eq-heading">
-    <div class="section-heading"><h2 id="eq-heading">Equalizer</h2><span class="hint">±12 dB</span></div>
+    <div class="section-heading">
+      <h2 id="eq-heading">Equalizer</h2>
+      <div class="section-heading-actions">
+        <span class="hint">±12 dB</span>
+        <button class="quiet-button section-reset" type="button" data-reset-section="eq">Reset</button>
+      </div>
+    </div>
     <div class="eq-grid" aria-label="10-band equalizer">
       <label><input type="range" min="-12" max="12" step="0.5" value="0" data-eq="31" aria-label="31 Hz equalizer"><span>31</span></label>
       <label><input type="range" min="-12" max="12" step="0.5" value="0" data-eq="62" aria-label="62 Hz equalizer"><span>62</span></label>
@@ -67,7 +79,10 @@
   </section>
 
   <details class="section advanced">
-    <summary>Advanced</summary>
+    <summary>
+      <span>Advanced</span>
+      <button class="quiet-button section-reset" type="button" data-reset-section="advanced">Reset</button>
+    </summary>
     <label class="range-row" for="balance"><span>Balance</span><output id="balance-value" for="balance">Center</output></label>
     <input id="balance" type="range" min="-100" max="100" step="1" value="0">
 
@@ -91,7 +106,7 @@
 
   <footer>
     <button id="bypass" type="button" aria-pressed="false">Bypass</button>
-    <button id="reset" type="button">Reset</button>
+    <button id="reset" type="button">Reset all</button>
     <button id="options" class="quiet-button" type="button">Saved settings</button>
   </footer>
 </main>

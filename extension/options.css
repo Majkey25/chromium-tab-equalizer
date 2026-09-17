@@ -16,6 +16,8 @@
 body { margin: 0; background: var(--bg); color: var(--text); }
 main { width: min(720px, calc(100% - 32px)); margin: 38px auto 70px; }
 header { margin-bottom: 28px; }
+.header-brand { display: flex; align-items: flex-start; gap: 12px; }
+.brand-icon { flex: none; }
 .eyebrow { color: var(--accent); font-size: 12px; font-weight: 700; margin: 0 0 6px; text-transform: uppercase; letter-spacing: .06em; }
 h1 { font-size: 28px; margin: 0; }
 .lede, .note, .count { color: var(--muted); }

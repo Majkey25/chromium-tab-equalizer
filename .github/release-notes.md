@@ -1,7 +1,10 @@
-Chromium Tab Equalizer v1.0.0 is the first stable release of the per-tab Chrome/Brave audio processor.
+# Chromium Tab Equalizer v1.0.1
 
-It includes independent tab activation, 0-200% volume, preamp, a 10-band ±12 dB EQ, balance, mono, compressor, limiter, bypass, built-in and custom presets, optional per-site profiles, and local JSON backup/restore.
+A small usability and visual-polish release.
 
-Audio processing runs in an MV3 offscreen document, so it continues after the popup closes. New tabs still require an explicit Enable click because Chromium does not permit silent `tabCapture` startup.
+- New minimalist transparent equalizer icon across the extension UI and browser icon sizes.
+- Added independent **Reset** actions for Level, Equalizer, and Advanced controls.
+- Kept **Reset all** for restoring the complete active-tab processing state in one click.
+- Packaging/version tests now derive the expected release version from package metadata instead of hard-coding v1.0.0.
 
-Download the ZIP below, extract it, and load the folder with **Load unpacked** in `chrome://extensions` or `brave://extensions`. `SHA256SUMS.txt` contains the release checksum.
+The audio engine, permissions, privacy model, and per-tab/site-profile behavior are unchanged from v1.0.0.

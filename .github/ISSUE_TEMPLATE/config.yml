@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Support guide
+    url: https://github.com/Majkey25/chromium-tab-equalizer/blob/main/SUPPORT.md
+    about: Check installation help and bug-report guidance before opening an issue.
+  - name: Latest release
+    url: https://github.com/Majkey25/chromium-tab-equalizer/releases/latest
+    about: Download the current stable build before reporting an issue fixed in a newer version.

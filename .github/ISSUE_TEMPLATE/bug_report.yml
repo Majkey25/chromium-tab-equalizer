@@ -1,0 +1,85 @@
+name: Bug report
+description: Report a reproducible problem with the extension
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please provide enough detail to reproduce it.
+  - type: input
+    id: extension-version
+    attributes:
+      label: Extension version
+      description: Example: 1.0.2
+      placeholder: 1.0.2
+    validations:
+      required: true
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Chrome
+        - Chromium
+        - Brave
+        - Edge / other Chromium browser
+    validations:
+      required: true
+  - type: input
+    id: browser-version
+    attributes:
+      label: Browser version
+      placeholder: 153.0.0.0
+    validations:
+      required: true
+  - type: input
+    id: site
+    attributes:
+      label: Website / URL
+      description: Share only if it is safe to make public.
+      placeholder: https://example.com/
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Use a short numbered sequence.
+      placeholder: |
+        1. Open ...
+        2. Enable the extension ...
+        3. Change ...
+        4. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: errors
+    attributes:
+      label: Console / service-worker errors
+      description: Paste relevant errors only. Remove private data first.
+      render: text
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: I tested the latest stable release.
+          required: true
+        - label: I reloaded the extension and retried the problem.
+          required: true
+        - label: I checked existing issues for duplicates.
+          required: true
+        - label: This report contains no passwords, tokens, private audio, or other sensitive data.
+          required: true

@@ -1,9 +1,14 @@
 # Changelog
 
-## 1.0.1 - 2026-09-17
+## 1.0.2
 
-- Refreshed the extension branding with a cleaner minimalist transparent SVG icon used across the popup and settings page.
-- Added section-level reset actions for Level, Equalizer, and Advanced controls while keeping the global Reset all control.
+- Replaced the framed toolbar icon with a frameless transparent five-fader design and regenerated all browser icon sizes.
+- Added a high-contrast active Mute state with a red fill, speaker-off glyph, and explicit Muted label.
+- Preserved the v1.0.1 section reset controls and existing audio behavior.
+
+## 1.0.1
+
+- Refreshed the extension branding and added section-level reset actions for Level, Equalizer, and Advanced controls while keeping the global Reset all control.
 
 ## 1.0.0 - release candidate
 

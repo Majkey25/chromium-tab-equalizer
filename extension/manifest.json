@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Chromium Tab Equalizer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Per-tab audio equalizer and volume controls for Chrome and Brave.",
   "homepage_url": "https://github.com/Majkey25/chromium-tab-equalizer",
   "permissions": [

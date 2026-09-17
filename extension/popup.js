@@ -79,6 +79,7 @@ function render(next) {
   elements.ratioValue.value = `${s.compressor.ratio}:1`;
   elements.limiter.checked = s.limiter;
   elements.mute.setAttribute('aria-pressed', String(s.muted));
+  elements.mute.textContent = s.muted ? 'Muted' : 'Mute';
   elements.bypass.setAttribute('aria-pressed', String(s.bypass));
   elements.remember.checked = next.rememberForSite;
   elements.compressorControls.hidden = !s.compressor.enabled;

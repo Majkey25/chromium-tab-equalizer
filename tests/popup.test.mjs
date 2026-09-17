@@ -31,3 +31,17 @@ test('popup CSS stays compact and avoids decorative AI styling', async () => {
   assert.match(css, /:focus-visible/);
   assert.match(css, /prefers-color-scheme:\s*dark/);
 });
+
+test('toolbar icon is frameless and the mute state is unmistakable', async () => {
+  const [icon, css, js] = await Promise.all([
+    readFile('extension/icons/icon.svg', 'utf8'),
+    readFile('extension/popup.css', 'utf8'),
+    readFile('extension/popup.js', 'utf8'),
+  ]);
+
+  assert.doesNotMatch(icon, /<rect\b/i, 'toolbar icon must not contain a square or rounded-rectangle frame');
+  assert.match(icon, /linearGradient/i, 'toolbar icon should use the approved modern gradient');
+  assert.match(css, /#mute\[aria-pressed="true"\][\s\S]*background:/, 'active mute needs a dedicated filled visual state');
+  assert.match(css, /#mute\[aria-pressed="true"\][\s\S]*color:\s*#fff/i, 'active mute needs high-contrast text');
+  assert.match(js, /elements\.mute\.textContent\s*=\s*s\.muted\s*\?\s*['"]Muted['"]\s*:\s*['"]Mute['"]/, 'mute label should change to Muted when active');
+});

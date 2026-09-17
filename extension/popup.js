@@ -162,11 +162,11 @@ elements.compressor.addEventListener('change', () => {
 });
 elements.threshold.addEventListener('input', () => {
   elements.thresholdValue.value = formatDb(elements.threshold.value);
-  schedulePatch({ compressor: { threshold: Number(elements.threshold.value), enabled: state.settings.compressor.enabled }, preset: 'Custom' });
+  schedulePatch({ compressor: { threshold: Number(elements.threshold.value) }, preset: 'Custom' });
 });
 elements.ratio.addEventListener('input', () => {
   elements.ratioValue.value = `${elements.ratio.value}:1`;
-  schedulePatch({ compressor: { ratio: Number(elements.ratio.value), enabled: state.settings.compressor.enabled }, preset: 'Custom' });
+  schedulePatch({ compressor: { ratio: Number(elements.ratio.value) }, preset: 'Custom' });
 });
 elements.limiter.addEventListener('change', () => schedulePatch({ limiter: elements.limiter.checked, preset: 'Custom' }));
 elements.mute.addEventListener('click', () => schedulePatch({ muted: !state.settings.muted }));

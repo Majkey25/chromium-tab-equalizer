@@ -1,10 +1,10 @@
-# Chromium Tab Equalizer v1.0.1
+# Chromium Tab Equalizer v1.0.2
 
-A small usability and visual-polish release.
+A focused visual-state release.
 
-- New minimalist transparent equalizer icon across the extension UI and browser icon sizes.
-- Added independent **Reset** actions for Level, Equalizer, and Advanced controls.
-- Kept **Reset all** for restoring the complete active-tab processing state in one click.
-- Packaging/version tests now derive the expected release version from package metadata instead of hard-coding v1.0.0.
+- Replaced the framed toolbar artwork with a genuinely transparent, frameless five-fader icon optimized for small Chromium toolbar sizes.
+- Regenerated the 16, 32, 48, and 128 px PNG icons from the same SVG master and verified transparent corner pixels.
+- Made active **Mute** unmistakable with a filled red state, white high-contrast text, a speaker-off glyph, and the explicit **Muted** label.
+- Kept the existing per-section resets and **Reset all** behavior unchanged.
 
-The audio engine, permissions, privacy model, and per-tab/site-profile behavior are unchanged from v1.0.0.
+The audio engine, permissions, privacy model, per-tab isolation, and site profiles are unchanged from v1.0.1.

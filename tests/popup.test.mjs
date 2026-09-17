@@ -11,6 +11,10 @@ test('popup exposes the full v1 mixer with accessible labels', async () => {
   assert.match(html, /id="remember"/);
   assert.match(html, /id="bypass"/);
   assert.match(html, /id="reset"/);
+  assert.match(html, /data-reset-section="level"/);
+  assert.match(html, /data-reset-section="eq"/);
+  assert.match(html, /data-reset-section="advanced"/);
+  assert.match(html, /icons\/icon\.svg/);
   assert.match(html, /<details/);
   for (const hz of [31,62,125,250,500,1000,2000,4000,8000,16000]) {
     assert.match(html, new RegExp(`data-eq="${hz}"`));

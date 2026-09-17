@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Refreshed the extension branding with a cleaner minimalist transparent SVG icon used across the popup and settings page.
+- Added section-level reset actions for Level, Equalizer, and Advanced controls while keeping the global Reset all control.
+
 ## 1.0.0 - release candidate
 
 - Added explicit per-tab audio capture for Chrome and Brave using Manifest V3 `tabCapture` and an offscreen Web Audio engine.

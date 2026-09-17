@@ -1,6 +1,6 @@
 {
   "name": "chromium-tab-equalizer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "description": "Per-tab audio equalizer for Chromium browsers.",

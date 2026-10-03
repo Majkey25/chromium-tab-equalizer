@@ -80,20 +80,14 @@ export function applyUserPreset(name, preset, current = {}) {
 
 export function applyPreset(name, current = {}) {
   if (!(name in BUILT_IN_PRESETS)) return sanitizeSettings(current);
-  const base = sanitizeSettings(current);
+  const live = sanitizeSettings(current);
+  const defaults = cloneDefaultSettings();
   const patch = BUILT_IN_PRESETS[name];
   const next = sanitizeSettings({
-    ...base,
-    ...patch,
-    enabled: base.enabled,
-    volume: base.volume,
-    muted: base.muted,
-    bypass: base.bypass,
-    balance: base.balance,
-    mono: base.mono,
-    limiter: base.limiter,
-    eq: { ...base.eq, ...(patch.eq ?? {}) },
-    compressor: { ...base.compressor, ...(patch.compressor ?? {}) },
+    ...live,
+    preamp: patch.preamp ?? defaults.preamp,
+    eq: { ...defaults.eq, ...(patch.eq ?? {}) },
+    compressor: { ...defaults.compressor, ...(patch.compressor ?? {}) },
     preset: name,
   });
   next.preset = name;

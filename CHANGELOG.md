@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3
+
+- Fixed built-in preset switching so a newly selected preset fully replaces EQ, preamp, and compressor values from the previous preset.
+- Fixed Flat so it reliably clears preset-controlled audio changes while preserving live controls such as volume, mute, bypass, balance, mono, and limiter.
+- Added regression coverage for switching between Bass Boost, Treble Boost, Night, and Flat.
+
 ## 1.0.2
 
 - Replaced the framed toolbar icon with a frameless transparent five-fader design and regenerated all browser icon sizes.

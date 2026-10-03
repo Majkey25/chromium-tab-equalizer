@@ -40,6 +40,27 @@ test('applies Bass Boost while preserving runtime enabled state and volume', () 
   assert.equal(BUILT_IN_PRESETS.Flat !== undefined, true);
 });
 
+
+test('switches built-in presets without retaining the previous preset state', () => {
+  const current = sanitizeSettings({ enabled: true, volume: 0.7, balance: 0.2, mono: true, limiter: false });
+  const bass = applyPreset('Bass Boost', current);
+  const treble = applyPreset('Treble Boost', bass);
+  assert.equal(treble.eq[62], 0);
+  assert.equal(treble.eq[8000], 5);
+
+  const night = applyPreset('Night', treble);
+  assert.equal(night.compressor.enabled, true);
+
+  const flat = applyPreset('Flat', night);
+  for (const hz of EQ_BANDS) assert.equal(flat.eq[hz], 0);
+  assert.equal(flat.preamp, 0);
+  assert.deepEqual(flat.compressor, { enabled: false, threshold: -24, ratio: 4 });
+  assert.equal(flat.volume, 0.7);
+  assert.equal(flat.balance, 0.2);
+  assert.equal(flat.mono, true);
+  assert.equal(flat.limiter, false);
+});
+
 test('unknown preset leaves settings sanitized and unchanged except preset label', () => {
   const current = sanitizeSettings({ volume: 0.8, eq: { 62: 3 } });
   assert.deepEqual(applyPreset('Nope', current), current);

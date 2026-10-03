@@ -1,10 +1,10 @@
-# Chromium Tab Equalizer v1.0.2
+# Chromium Tab Equalizer v1.0.3
 
-A focused visual-state release.
+A focused preset-switching bug-fix release.
 
-- Replaced the framed toolbar artwork with a genuinely transparent, frameless five-fader icon optimized for small Chromium toolbar sizes.
-- Regenerated the 16, 32, 48, and 128 px PNG icons from the same SVG master and verified transparent corner pixels.
-- Made active **Mute** unmistakable with a filled red state, white high-contrast text, a speaker-off glyph, and the explicit **Muted** label.
-- Kept the existing per-section resets and **Reset all** behavior unchanged.
+- Fixed built-in presets retaining EQ values from the previously selected preset.
+- Fixed **Flat** so it actually returns preset-controlled EQ, preamp, and compressor settings to neutral defaults.
+- Preserved live controls such as volume, mute, bypass, balance, mono, and limiter when changing presets.
+- Added regression coverage for repeated preset changes.
 
-The audio engine, permissions, privacy model, per-tab isolation, and site profiles are unchanged from v1.0.1.
+No permissions, privacy behavior, or audio-capture flow changed in this release.

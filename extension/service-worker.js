@@ -109,8 +109,9 @@ function inactiveState(tab, config, error = null) {
 }
 
 async function getTabState(tab) {
-  const config = await readConfig();
   const state = await readTabState(tab.id);
+  if (state?.active) return state;
+  const config = await readConfig();
   return state ?? inactiveState(tab, config);
 }
 

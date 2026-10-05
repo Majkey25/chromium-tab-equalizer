@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.4 - 2026-10-05
+
+- Add privacy, local-data deletion, and free-use information, linked from Saved settings and included in releases.
+- Clarify local audio and hostname processing in the README.
+
 ## 1.0.3
 
 - Fixed built-in preset switching so a newly selected preset fully replaces EQ, preamp, and compressor values from the previous preset.

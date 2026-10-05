@@ -34,7 +34,8 @@ h2 { font-size: 15px; margin: 0; }
 .empty { color: var(--muted); font-size: 12px; margin: 0; }
 button { color: var(--text); background: transparent; border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; cursor: pointer; font: inherit; }
 button:hover { border-color: var(--accent); }
-button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+a { color: var(--accent); }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 button.danger { color: var(--danger); }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .message, .error { font-size: 12px; margin-bottom: 0; }

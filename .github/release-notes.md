@@ -1,10 +1,5 @@
-# Chromium Tab Equalizer v1.0.3
+# Chromium Tab Equalizer v1.0.4
 
-A focused preset-switching bug-fix release.
-
-- Fixed built-in presets retaining EQ values from the previously selected preset.
-- Fixed **Flat** so it actually returns preset-controlled EQ, preamp, and compressor settings to neutral defaults.
-- Preserved live controls such as volume, mute, bypass, balance, mono, and limiter when changing presets.
-- Added regression coverage for repeated preset changes.
-
-No permissions, privacy behavior, or audio-capture flow changed in this release.
+- Add privacy, local-data deletion, and free-use information, linked from Saved settings.
+- Include the privacy notice in the release ZIP.
+- Clarify local audio and hostname processing. Audio controls and permissions are unchanged.

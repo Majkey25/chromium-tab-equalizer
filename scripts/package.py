@@ -18,7 +18,7 @@ archive_name = f"chromium-tab-equalizer-{version}.zip"
 archive_path = DIST / archive_name
 
 runtime_files = sorted(path for path in EXTENSION.rglob("*") if path.is_file())
-root_files = [ROOT / "README.md", ROOT / "LICENSE", ROOT / "CHANGELOG.md"]
+root_files = [ROOT / "README.md", ROOT / "LICENSE", ROOT / "CHANGELOG.md", ROOT / "PRIVACY.md"]
 for path in root_files:
     if not path.exists():
         raise SystemExit(f"Missing release file: {path.name}")

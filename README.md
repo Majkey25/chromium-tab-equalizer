@@ -28,6 +28,7 @@
   <a href="#development">Development</a> ·
   <a href="CHANGELOG.md">Changelog</a> ·
   <a href="SUPPORT.md">Support</a> ·
+  <a href="PRIVACY.md">Privacy and data deletion</a> ·
   <a href="SECURITY.md">Security</a>
 </p>
 
@@ -99,7 +100,7 @@ For a higher-level implementation overview, see [docs/ARCHITECTURE.md](docs/ARCH
 
 ## Privacy
 
-The extension does not collect browsing history, page content, audio samples, analytics, identifiers, or telemetry. Saved settings stay in Chromium extension storage. Import/export happens only after an explicit local file action.
+Audio and current-tab hostnames are processed locally for the equalizer. Audio is not recorded or transmitted. Saved settings stay in Chromium extension storage. Import/export happens only after an explicit local file action. See [privacy, data deletion, and terms of use](PRIVACY.md).
 
 See [SECURITY.md](SECURITY.md) for vulnerability reporting.
 

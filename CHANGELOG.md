@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.5 - 2026-10-05
+
+- Skip loading unrelated saved profiles when returning an existing active tab state.
+- Add message-path coverage for active state, inactive fallback, configuration validation, and stopping a tab.
+- In ten matched lab runs with 500 synthetic profiles, active-state retrieval median fell from 17.4 to 0.65 ms. This does not measure audio capture startup or listening quality.
+
 ## 1.0.4 - 2026-10-05
 
 - Add privacy, local-data deletion, and free-use information, linked from Saved settings and included in releases.

@@ -19,6 +19,9 @@ export function normalizeHostname(value) {
     hostname = text;
   }
   hostname = hostname.toLowerCase().replace(/^www\./, '').replace(/\.$/, '');
+  if (hostname.startsWith('[') && hostname.endsWith(']') && isHttpUrl(`http://${hostname}`)) {
+    return new URL(`http://${hostname}`).hostname;
+  }
   if (!hostname || hostname.includes('/') || hostname.includes(':')) throw new TypeError('Invalid http hostname');
   return hostname;
 }

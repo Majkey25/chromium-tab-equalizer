@@ -34,16 +34,41 @@ globalThis.chrome = {
     async query() { return [tab]; },
     onRemoved: { addListener() {} },
     onUpdated: { addListener(value) { updated = value; } }
-  }
+  },
+  tabCapture: { async getMediaStreamId() { return 'fixture-stream'; } }
 };
 await import('../extension/service-worker.js');
 
 beforeEach(() => {
+  tab.url = 'https://fixture.invalid/';
   session.clear();
   config = { schemaVersion: 1, profiles: {}, userPresets: {}, preferences: {} };
   localReads = 0;
   sessionReads = 0;
   audioMessages = [];
+});
+
+test('IPv6 pages resolve saved profiles, start capture and follow navigation', async () => {
+  tab.url = 'http://[::1]:4173/audio.html';
+  config.profiles['[::1]'] = { volume: 0.42 };
+  const inactive = await request('GET_TAB_STATE');
+  assert.equal(inactive.ok, true, inactive.error);
+  assert.equal(inactive.state.hostname, '[::1]');
+  assert.equal(inactive.state.settings.volume, 0.42);
+  const started = await request('START_TAB');
+  assert.equal(started.ok, true, started.error);
+  assert.equal(started.state.active, true);
+  assert.equal(started.state.settings.volume, 0.42);
+  updated(tab.id, { url: 'http://[::1]:4173/next' });
+  await new Promise(setImmediate);
+  assert.equal(session.get('tab:7').url, 'http://[::1]:4173/next');
+  assert.deepEqual(audioMessages.map(message => message.type), ['AUDIO_START']);
+  config.profiles['[2001:db8::1]'] = { volume: 0.6 };
+  updated(tab.id, { url: 'https://[2001:db8::1]/' });
+  await new Promise(setImmediate);
+  assert.equal(session.get('tab:7').hostname, '[2001:db8::1]');
+  assert.equal(session.get('tab:7').settings.volume, 0.6);
+  assert.deepEqual(audioMessages.map(message => message.type), ['AUDIO_START', 'AUDIO_REPLACE']);
 });
 
 function request(type, data = {}) {

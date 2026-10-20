@@ -8,6 +8,8 @@ let config;
 let localReads;
 let sessionReads;
 let listener;
+let updated;
+let audioMessages;
 
 globalThis.chrome = {
   storage: {
@@ -23,12 +25,15 @@ globalThis.chrome = {
   },
   runtime: {
     onMessage: { addListener(value) { listener = value; } },
-    async getContexts() { return []; }
+    async getContexts() { return []; },
+    getURL(path) { return `chrome-extension://test/${path}`; },
+    async sendMessage(message) { audioMessages.push(message); return { ok: true }; }
   },
+  offscreen: { async createDocument() {} },
   tabs: {
     async query() { return [tab]; },
     onRemoved: { addListener() {} },
-    onUpdated: { addListener() {} }
+    onUpdated: { addListener(value) { updated = value; } }
   }
 };
 await import('../extension/service-worker.js');
@@ -38,10 +43,11 @@ beforeEach(() => {
   config = { schemaVersion: 1, profiles: {}, userPresets: {}, preferences: {} };
   localReads = 0;
   sessionReads = 0;
+  audioMessages = [];
 });
 
-function request(type) {
-  return new Promise(resolve => listener({ type }, {}, resolve));
+function request(type, data = {}) {
+  return new Promise(resolve => listener({ type, ...data }, {}, resolve));
 }
 
 test('active session returns its existing controls without reading unrelated profiles', async () => {
@@ -90,4 +96,41 @@ test('stop clears active session and returns the current saved-site fallback', a
   assert.equal(response.state.settings.volume, 0.42);
   assert.equal(session.has('tab:7'), false);
   assert.equal(localReads, 1);
+});
+
+test('same-site URL changes preserve temporary volume, mute and EQ', async () => {
+  const settings = { ...cloneDefaultSettings(), enabled: true, volume: 0.23, muted: true };
+  settings.eq[125] = 7;
+  const state = { tabId: tab.id, active: true, hostname: 'fixture.invalid', settings, rememberForSite: false };
+  session.set('tab:7', state);
+  const url = 'https://fixture.invalid/next?track=2#chapter';
+  updated(tab.id, { url });
+  await new Promise(setImmediate);
+  assert.deepEqual(session.get('tab:7'), { ...state, url });
+  assert.deepEqual(audioMessages, []);
+  assert.equal(localReads, 0);
+});
+
+test('cross-site navigation still applies saved profiles and resets unknown sites', async () => {
+  session.set('tab:7', { active: true, hostname: 'fixture.invalid', settings: { ...cloneDefaultSettings(), volume: 0.23 } });
+  config.profiles['next.invalid'] = { volume: 0.42 };
+  updated(tab.id, { url: 'https://next.invalid/watch' });
+  await new Promise(setImmediate);
+  assert.equal(session.get('tab:7').settings.volume, 0.42);
+  assert.equal(session.get('tab:7').rememberForSite, true);
+  updated(tab.id, { url: 'https://unknown.invalid/' });
+  await new Promise(setImmediate);
+  assert.equal(session.get('tab:7').settings.volume, 1);
+  assert.equal(session.get('tab:7').rememberForSite, false);
+  assert.deepEqual(audioMessages.map(({ type }) => type), ['AUDIO_REPLACE', 'AUDIO_REPLACE']);
+});
+
+test('ended audio clears the active flag and keeps the error available to the popup', async () => {
+  session.set('tab:7', { active: true, settings: { ...cloneDefaultSettings(), enabled: true, volume: 0.23 } });
+  assert.equal((await request('AUDIO_FAILED', { tabId: 7, error: 'Tab audio capture ended.' })).ok, true);
+  const response = await request('GET_TAB_STATE');
+  assert.equal(response.state.active, false);
+  assert.equal(response.state.settings.enabled, false);
+  assert.equal(response.state.settings.volume, 0.23);
+  assert.equal(response.state.error, 'Tab audio capture ended.');
 });

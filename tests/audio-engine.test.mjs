@@ -80,3 +80,49 @@ test('apply updates graph in place', () => {
   assert.equal(graph.stereoGain.gain.value, 1);
   assert.equal(graph.monoGain.gain.value, 0);
 });
+
+test('an ended capture notifies the worker and a normal stop does not report failure', async (t) => {
+  let listener;
+  let stops = 0;
+  let closes = 0;
+  const messages = [];
+  const track = { onended: null, stop() { stops += 1; } };
+  const previousChrome = globalThis.chrome;
+  const previousContext = globalThis.AudioContext;
+  const previousMedia = Object.getOwnPropertyDescriptor(navigator, 'mediaDevices');
+  t.after(() => {
+    globalThis.chrome = previousChrome;
+    globalThis.AudioContext = previousContext;
+    if (previousMedia) Object.defineProperty(navigator, 'mediaDevices', previousMedia);
+    else delete navigator.mediaDevices;
+  });
+  globalThis.chrome = { runtime: {
+    onMessage: { addListener(value) { listener = value; } },
+    async sendMessage(message) { messages.push(message); }
+  } };
+  globalThis.AudioContext = class extends Context {
+    constructor() { super(); this.state = 'running'; }
+    createMediaStreamSource() { return new Node('source'); }
+    async close() { this.state = 'closed'; closes += 1; }
+  };
+  Object.defineProperty(navigator, 'mediaDevices', { configurable: true, value: {
+    async getUserMedia() { return { getTracks() { return [track]; } }; }
+  } });
+  await import('../extension/offscreen.js');
+  const request = (type) => new Promise(resolve => listener({ target: 'offscreen', type, tabId: 7, streamId: 'stream' }, {}, resolve));
+  assert.equal((await request('AUDIO_START')).ok, true);
+  track.onended();
+  await new Promise(setImmediate);
+  assert.equal(stops, 1);
+  assert.equal(closes, 1);
+  assert.equal(messages.length, 1);
+  assert.equal(messages[0].type, 'AUDIO_FAILED');
+  assert.equal(messages[0].tabId, 7);
+  assert.match(messages[0].error, /capture ended/i);
+  assert.equal((await request('AUDIO_START')).ok, true);
+  assert.equal((await request('AUDIO_STOP')).ok, true);
+  assert.equal(track.onended, null);
+  assert.equal(messages.length, 1);
+  assert.equal(stops, 2);
+  assert.equal(closes, 2);
+});

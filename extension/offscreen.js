@@ -43,7 +43,11 @@ async function startGraph({ tabId, streamId, settings }) {
   const record = { stream, graph };
   graphs.set(tabId, record);
   for (const track of stream.getTracks()) {
-    track.onended = () => { destroyGraph(tabId).catch(() => {}); };
+    track.onended = () => {
+      destroyGraph(tabId).finally(() => chrome.runtime.sendMessage({
+        type: 'AUDIO_FAILED', tabId, error: 'Tab audio capture ended. Enable processing again to restart.'
+      })).catch(() => {});
+    };
   }
 }
 

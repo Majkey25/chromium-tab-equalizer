@@ -280,6 +280,10 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
       await stopTab(tabId);
       return;
     }
+    if (normalizeHostname(changeInfo.url) === state.hostname) {
+      await writeTabState(tabId, { ...state, url: changeInfo.url });
+      return;
+    }
     const config = await readConfig();
     const resolved = resolveNavigationSettings({ url: changeInfo.url, profiles: config.profiles, temporaryAfterNavigation: null });
     const settings = sanitizeSettings({ ...resolved.settings, enabled: true });

@@ -38,3 +38,13 @@ test('unknown hostname starts Flat on navigation', () => {
 test('rejects unsupported schemes for normalization', () => {
   assert.throws(() => normalizeHostname('chrome://extensions'), /http/i);
 });
+
+test('normalizes valid IPv6 URLs and stored hosts without accepting ports or malformed literals', () => {
+  const url = new URL('http://[::1]:4173/audio.html');
+  assert.equal(normalizeHostname(url.href), '[::1]');
+  assert.equal(normalizeHostname(url.hostname), '[::1]');
+  assert.equal(normalizeHostname('https://[2001:0db8::1]/'), '[2001:db8::1]');
+  for (const host of ['example.com:80', '::1', '[invalid::host]', '[::1]:4173']) {
+    assert.throws(() => normalizeHostname(host), /hostname/);
+  }
+});

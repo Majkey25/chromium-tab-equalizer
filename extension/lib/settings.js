@@ -1,4 +1,5 @@
 export const EQ_BANDS = Object.freeze([31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 16000]);
+export const MAX_IMPORT_BYTES = 2 * 1024 * 1024;
 
 const BOOLEAN_KEYS = ['enabled', 'muted', 'bypass', 'mono', 'limiter'];
 const clamp = (value, min, max, fallback) => {
@@ -96,15 +97,17 @@ export function applyPreset(name, current = {}) {
 
 function sanitizeRecord(record, label) {
   if (!isObject(record)) throw new TypeError(`${label} must be an object`);
+  const names = Object.keys(record);
   const output = {};
-  for (const [name, settings] of Object.entries(record)) {
+  for (const name of names) {
+    const settings = record[name];
     if (!isObject(settings)) throw new TypeError(`${label}.${name} must be an object`);
-    output[String(name).slice(0, 253)] = sanitizeSettings(settings);
+    output[name] = sanitizeSettings(settings);
   }
   return output;
 }
 
-export function validateImportDocument(value) {
+export function sanitizeConfig(value) {
   if (!isObject(value)) throw new TypeError('Import document must be an object');
   if (value.schemaVersion !== 1) throw new TypeError('Unsupported schemaVersion');
   const profiles = sanitizeRecord(value.profiles, 'profiles');
@@ -113,4 +116,18 @@ export function validateImportDocument(value) {
   const preferences = {};
   if (['system', 'light', 'dark'].includes(value.preferences.theme)) preferences.theme = value.preferences.theme;
   return { schemaVersion: 1, profiles, userPresets, preferences };
+}
+
+export function validateImportDocument(value) {
+  if (!isObject(value)) throw new TypeError('Import document must be an object');
+  if (new TextEncoder().encode(JSON.stringify(value)).byteLength > MAX_IMPORT_BYTES) {
+    throw new RangeError('Settings exceed the 2 MiB limit');
+  }
+  for (const label of ['profiles', 'userPresets']) {
+    if (!isObject(value[label])) continue;
+    const names = Object.keys(value[label]);
+    if (names.length > 500) throw new RangeError(`${label} may contain at most 500 entries`);
+    if (names.some((name) => name.length > 253)) throw new RangeError(`${label} names may contain at most 253 characters`);
+  }
+  return sanitizeConfig(value);
 }

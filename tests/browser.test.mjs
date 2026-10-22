@@ -166,6 +166,20 @@ test('real unpacked extension loads and core pages talk to the service worker', 
     assert.equal(exported.document.profiles['youtube.com'].volume, 0.42);
     assert.equal(exported.document.userPresets.Test.volume, 0.33);
 
+    const oversizedImport = await evaluate(options.cdp, `(() => {
+      const file = new File([new Uint8Array(2 * 1024 * 1024 + 1)], 'oversized.json');
+      file.text = () => { throw new Error('Oversized file was read'); };
+      const transfer = new DataTransfer();
+      transfer.items.add(file);
+      const input = document.querySelector('#import-file');
+      input.files = transfer.files;
+      input.dispatchEvent(new Event('change'));
+      return document.querySelector('#error').textContent;
+    })()`);
+    assert.match(oversizedImport, /exceeds the 2 MiB limit/);
+    const unchanged = await evaluate(options.cdp, `chrome.runtime.sendMessage({type:'EXPORT_SETTINGS'})`);
+    assert.deepEqual(unchanged.document, exported.document);
+
     const popupTabId = await evaluate(popup.cdp, 'chrome.tabs.getCurrent().then(t => t.id)');
     await evaluate(options.cdp, `chrome.storage.session.set({'tab:${popupTabId}': {active:false, probe:true}})`);
     await popup.cdp.send('Page.close');

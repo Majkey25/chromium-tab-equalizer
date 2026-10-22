@@ -1,3 +1,5 @@
+import { MAX_IMPORT_BYTES } from './lib/settings.js';
+
 const $ = (selector) => document.querySelector(selector);
 const profilesEl = $('#profiles');
 const presetsEl = $('#presets');
@@ -93,6 +95,7 @@ importFile.addEventListener('change', async () => {
   importFile.value = '';
   if (!file) return;
   try {
+    if (file.size > MAX_IMPORT_BYTES) throw new RangeError('The file exceeds the 2 MiB limit.');
     const documentData = JSON.parse(await file.text());
     if (!confirm('Replace all saved site profiles and custom presets with this file?')) return;
     config = (await request('IMPORT_SETTINGS', { document: documentData })).config;

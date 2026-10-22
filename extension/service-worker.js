@@ -3,6 +3,7 @@ import {
   applyPreset,
   applyUserPreset,
   cloneDefaultSettings,
+  sanitizeConfig,
   sanitizeSettings,
   validateImportDocument,
 } from './lib/settings.js';
@@ -11,6 +12,17 @@ import { normalizeHostname, resolveNavigationSettings } from './lib/profile-reso
 const LOCAL_KEY = 'config';
 const SESSION_PREFIX = 'tab:';
 let offscreenPromise = null;
+const navigationUpdates = new Map();
+const tabTasks = new Map();
+
+function queueTabTask(tabId, update) {
+  const previous = tabTasks.get(tabId) ?? Promise.resolve();
+  const task = previous.catch(() => {}).then(update);
+  tabTasks.set(tabId, task);
+  const cleanup = () => { if (tabTasks.get(tabId) === task) tabTasks.delete(tabId); };
+  task.then(cleanup, cleanup);
+  return task;
+}
 
 function sessionKey(tabId) {
   return `${SESSION_PREFIX}${tabId}`;
@@ -31,11 +43,11 @@ async function readConfig() {
   if (!config || config.schemaVersion !== 1) {
     return { schemaVersion: 1, profiles: {}, userPresets: {}, preferences: {} };
   }
-  return validateImportDocument(config);
+  return sanitizeConfig(config);
 }
 
 async function writeConfig(config) {
-  const clean = validateImportDocument(config);
+  const clean = sanitizeConfig(config);
   await chrome.storage.local.set({ [LOCAL_KEY]: clean });
   return clean;
 }
@@ -115,8 +127,7 @@ async function getTabState(tab) {
   return state ?? inactiveState(tab, config);
 }
 
-async function startTab(sender) {
-  const tab = await getActiveTab(sender);
+async function startTab(tab) {
   if (!isSupportedUrl(tab.url)) throw new Error('This page cannot be captured. Open a normal http(s) tab.');
 
   const existing = await readTabState(tab.id);
@@ -159,6 +170,7 @@ async function stopTab(tabId) {
 async function patchTab(tab, patch) {
   const state = await readTabState(tab.id);
   if (!state?.active) throw new Error('Enable processing for this tab first.');
+  await requireCurrentHostname(tab.id, state.hostname);
   const settings = mergeSettings(state.settings, patch);
   settings.enabled = true;
   const next = { ...state, settings, error: null };
@@ -168,6 +180,7 @@ async function patchTab(tab, patch) {
   if (next.rememberForSite && next.hostname) {
     const config = await readConfig();
     config.profiles[next.hostname] = settings;
+    await requireCurrentHostname(tab.id, next.hostname);
     await writeConfig(config);
   }
   return next;
@@ -179,10 +192,18 @@ async function setSiteMemory(tab, enabled) {
   const config = await readConfig();
   if (enabled) config.profiles[state.hostname] = sanitizeSettings(state.settings);
   else delete config.profiles[state.hostname];
+  await requireCurrentHostname(tab.id, state.hostname);
   await writeConfig(config);
   const next = { ...state, rememberForSite: Boolean(enabled) };
   await writeTabState(tab.id, next);
   return next;
+}
+
+async function requireCurrentHostname(tabId, hostname) {
+  const current = await chrome.tabs.get(tabId);
+  if (!isSupportedUrl(current.url) || normalizeHostname(current.url) !== hostname) {
+    throw new Error('The tab navigated. Reopen the popup before changing site settings.');
+  }
 }
 
 async function applyNamedPreset(tab, name) {
@@ -219,31 +240,42 @@ async function handleMessage(message, sender) {
   if (!message || message.target === 'offscreen') return undefined;
   if (message.type === 'AUDIO_FAILED') {
     const tabId = Number(message.tabId);
-    const previous = await readTabState(tabId);
-    if (previous) {
-      const settings = sanitizeSettings({ ...previous.settings, enabled: false });
-      await writeTabState(tabId, { ...previous, active: false, settings, error: String(message.error || 'Audio processing stopped.') });
-    }
-    return { ok: true };
+    return queueTabTask(tabId, async () => {
+      const previous = await readTabState(tabId);
+      if (previous) {
+        const settings = sanitizeSettings({ ...previous.settings, enabled: false });
+        await writeTabState(tabId, { ...previous, active: false, settings, error: String(message.error || 'Audio processing stopped.') });
+      }
+      return { ok: true };
+    });
   }
 
   const tab = ['GET_TAB_STATE', 'START_TAB', 'PATCH_TAB_SETTINGS', 'SET_SITE_MEMORY', 'APPLY_PRESET', 'STOP_TAB']
-    .includes(message.type) ? await getActiveTab(sender) : null;
+    .includes(message.type) ? { ...await getActiveTab(sender) } : null;
+
+  if (tab) return queueTabTask(tab.id, async () => {
+    if (!['GET_TAB_STATE', 'STOP_TAB'].includes(message.type)) {
+      if (!isSupportedUrl(tab.url)) throw new Error('This page cannot be captured. Open a normal http(s) tab.');
+      await requireCurrentHostname(tab.id, normalizeHostname(tab.url));
+    }
+    switch (message.type) {
+      case 'GET_TAB_STATE':
+        return { ok: true, state: await getTabState(tab) };
+      case 'START_TAB':
+        return { ok: true, state: await startTab(tab) };
+      case 'STOP_TAB':
+        await stopTab(tab.id);
+        return { ok: true, state: await getTabState(tab) };
+      case 'PATCH_TAB_SETTINGS':
+        return { ok: true, state: await patchTab(tab, message.patch ?? {}) };
+      case 'SET_SITE_MEMORY':
+        return { ok: true, state: await setSiteMemory(tab, Boolean(message.enabled)) };
+      case 'APPLY_PRESET':
+        return { ok: true, state: await applyNamedPreset(tab, String(message.name ?? '')) };
+    }
+  });
 
   switch (message.type) {
-    case 'GET_TAB_STATE':
-      return { ok: true, state: await getTabState(tab) };
-    case 'START_TAB':
-      return { ok: true, state: await startTab(sender) };
-    case 'STOP_TAB':
-      await stopTab(tab.id);
-      return { ok: true, state: await getTabState(tab) };
-    case 'PATCH_TAB_SETTINGS':
-      return { ok: true, state: await patchTab(tab, message.patch ?? {}) };
-    case 'SET_SITE_MEMORY':
-      return { ok: true, state: await setSiteMemory(tab, Boolean(message.enabled)) };
-    case 'APPLY_PRESET':
-      return { ok: true, state: await applyNamedPreset(tab, String(message.name ?? '')) };
     case 'GET_OPTIONS_DATA':
       return { ok: true, config: await readConfig() };
     case 'SAVE_USER_PRESET':
@@ -268,39 +300,63 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 chrome.tabs.onRemoved.addListener((tabId) => {
-  stopTab(tabId).catch(() => {});
+  queueNavigation(tabId, null);
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
   if (!changeInfo.url) return;
-  (async () => {
-    const state = await readTabState(tabId);
-    if (!state?.active) return;
-    if (!isSupportedUrl(changeInfo.url)) {
-      await stopTab(tabId);
-      return;
-    }
-    if (normalizeHostname(changeInfo.url) === state.hostname) {
-      await writeTabState(tabId, { ...state, url: changeInfo.url });
-      return;
-    }
-    const config = await readConfig();
-    const resolved = resolveNavigationSettings({ url: changeInfo.url, profiles: config.profiles, temporaryAfterNavigation: null });
-    const settings = sanitizeSettings({ ...resolved.settings, enabled: true });
-    const next = {
-      ...state,
-      url: changeInfo.url,
-      hostname: resolved.hostname,
-      settings,
-      rememberForSite: resolved.source === 'site',
-      error: null,
-    };
-    try {
-      await sendOffscreen({ type: 'AUDIO_REPLACE', tabId, settings });
-      await writeTabState(tabId, next);
-    } catch (error) {
-      settings.enabled = false;
-      await writeTabState(tabId, { ...next, active: false, settings, error: `Audio processing stopped: ${error.message}` });
-    }
-  })().catch(() => {});
+  queueNavigation(tabId, changeInfo.url);
 });
+
+function queueNavigation(tabId, url) {
+  const pending = navigationUpdates.get(tabId);
+  if (pending) {
+    if (pending.url !== null) pending.url = url;
+    return;
+  }
+  const update = { url };
+  navigationUpdates.set(tabId, update);
+  queueTabTask(tabId, async () => {
+    try {
+      while (update.url !== undefined) {
+        const nextUrl = update.url;
+        update.url = undefined;
+        const task = nextUrl === null ? stopTab(tabId) : updateNavigation(tabId, nextUrl);
+        await task.catch(() => {});
+      }
+    } finally {
+      navigationUpdates.delete(tabId);
+    }
+  }).catch(() => {});
+}
+
+async function updateNavigation(tabId, url) {
+  const state = await readTabState(tabId);
+  if (!state?.active) return;
+  if (!isSupportedUrl(url)) {
+    await stopTab(tabId);
+    return;
+  }
+  if (normalizeHostname(url) === state.hostname) {
+    await writeTabState(tabId, { ...state, url });
+    return;
+  }
+  const config = await readConfig();
+  const resolved = resolveNavigationSettings({ url, profiles: config.profiles, temporaryAfterNavigation: null });
+  const settings = sanitizeSettings({ ...resolved.settings, enabled: true });
+  const next = {
+    ...state,
+    url,
+    hostname: resolved.hostname,
+    settings,
+    rememberForSite: resolved.source === 'site',
+    error: null,
+  };
+  try {
+    await sendOffscreen({ type: 'AUDIO_REPLACE', tabId, settings });
+    await writeTabState(tabId, next);
+  } catch (error) {
+    settings.enabled = false;
+    await writeTabState(tabId, { ...next, active: false, settings, error: `Audio processing stopped: ${error.message}` });
+  }
+}

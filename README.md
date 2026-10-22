@@ -43,6 +43,7 @@
 - Save custom presets from the current tuned tab.
 - Temporary per-tab settings by default with optional **Remember for this site** profiles.
 - Manage site profiles and presets and import/export JSON from the options page.
+- Imports accept files up to 2 MiB, with at most 500 site profiles and 500 presets. Names are limited to 253 characters.
 - Processing continues after the popup closes through an offscreen Web Audio engine.
 - No accounts, ads, analytics, telemetry, cloud service, or extension network requests.
 

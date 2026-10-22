@@ -7,6 +7,7 @@ import {
   applyUserPreset,
   sanitizeSettings,
   validateImportDocument,
+  MAX_IMPORT_BYTES,
 } from '../extension/lib/settings.js';
 
 test('sanitizes control ranges and all ten EQ bands', () => {
@@ -84,6 +85,21 @@ test('validates and sanitizes import documents', () => {
 test('rejects malformed import documents', () => {
   assert.throws(() => validateImportDocument({ schemaVersion: 1, profiles: [] }), /profiles/i);
   assert.throws(() => validateImportDocument({ schemaVersion: 2, profiles: {}, userPresets: {}, preferences: {} }), /schema/i);
+});
+
+test('rejects oversized imports and excessive records before expanding their settings', () => {
+  const doc = { schemaVersion: 1, profiles: {}, userPresets: {}, preferences: {} };
+  assert.throws(() => validateImportDocument({ ...doc, ignored: 'x'.repeat(MAX_IMPORT_BYTES) }), /2 MiB/);
+  assert.throws(() => validateImportDocument({ ...doc, ignored: 'č'.repeat(MAX_IMPORT_BYTES / 2) }), /2 MiB/);
+  for (const key of ['profiles', 'userPresets']) {
+    doc[key] = Object.fromEntries(Array.from({ length: 500 }, (_, index) => [`site${index}.example`, {}]));
+    assert.equal(Object.keys(validateImportDocument(doc)[key]).length, 500);
+    doc[key].extra = {};
+    assert.throws(() => validateImportDocument(doc), /at most 500/);
+    doc[key] = { ['x'.repeat(254)]: {} };
+    assert.throws(() => validateImportDocument(doc), /at most 253/);
+    doc[key] = {};
+  }
 });
 
 

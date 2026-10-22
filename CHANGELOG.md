@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.6 - 2026-10-22
+
+- Serialize tab updates and recheck the current hostname before saving site settings.
+- Coalesce pending navigation events and clean up closed tabs without restoring stale state.
+- Reject settings imports above 2 MiB, 500 profiles or presets, or 253 characters per name while preserving existing saved settings.
+
 ## 1.0.5 - 2026-10-05
 
 - Skip loading unrelated saved profiles when returning an existing active tab state.
